@@ -19,7 +19,9 @@ setup(
     classifiers=[  # Optional
         "Development Status :: 3 - Alpha",
     ],
-    packages=["crawler"],  # 指定只安裝 crawler 這個套件
+    # packages=["crawler"],  # 指定只安裝 crawler 這個套件
     # packages=find_packages(where="src"),
     # package_dir={"": "src"},
+    packages=find_packages(where="crawler"),
+    package_dir={"": "crawler"},
 )
