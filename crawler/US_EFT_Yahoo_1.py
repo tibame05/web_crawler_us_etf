@@ -60,8 +60,6 @@ ticker = etf_codes_short
 start_date = '2015-05-01'
 end_date = pd.Timestamp.today().strftime('%Y-%m-%d')
 
-
-
 failed_tickers = []
 
 for r in ticker:
