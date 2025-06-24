@@ -1,6 +1,8 @@
-# web_crawler_us_etf
+# 爬取美股ETF股價資料
 
-# crawler
+#
+https://tw.tradingview.com/markets/etfs/funds-usa/
+##
 
 # 安裝套件
 pip install yfinance
