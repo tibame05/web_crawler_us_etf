@@ -47,8 +47,6 @@ with open("Output/us_etf_codes.csv", mode="w", newline="", encoding="utf-8") as 
 
 print("已成功寫入 us_etf_codes.csv")
 
-
-
 # 取前三碼英文函式
 def get_first_three_letters(code):
     letters = ''.join([ch for ch in code if ch.isalpha()])  # 過濾出英文字母
