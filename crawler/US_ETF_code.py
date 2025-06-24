@@ -36,7 +36,7 @@ for c in etf_codes:
     print(c)
 
 # 寫入 CSV 檔案
-with open("us_etf_codes.csv", mode="w", newline="", encoding="utf-8") as file:
+with open("Output/us_etf_codes.csv", mode="w", newline="", encoding="utf-8") as file:
     writer = csv.writer(file)
     writer.writerow(["ETF代碼"])  # 寫入欄位名稱
     for code in etf_codes:
@@ -55,7 +55,7 @@ def get_first_three_letters(code):
 etf_codes_short = [get_first_three_letters(code) for code in etf_codes]
 
 # 寫入 CSV 時，把 etf_codes_short 寫入
-with open("us_etf_codes_short.csv", mode="w", newline="", encoding="utf-8") as file:
+with open("Output/us_etf_codes_short.csv", mode="w", newline="", encoding="utf-8") as file:
     writer = csv.writer(file)
     writer.writerow(["ETF前三碼英文"])  # 欄位名稱
     for short_code in etf_codes_short:
