@@ -53,7 +53,7 @@ def get_first_three_letters(code):
 
 # 修改你的主要程式碼片段，把 etf_codes 轉成前三碼英文
 etf_codes_short = [get_first_three_letters(code) for code in etf_codes]
-
+print(etf_codes)
 # 寫入 CSV 時，把 etf_codes_short 寫入
 with open("Output/us_etf_codes_short.csv", mode="w", newline="", encoding="utf-8") as file:
     writer = csv.writer(file)
