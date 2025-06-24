@@ -1,9 +1,11 @@
 ### 爬取 Yahoo 美股ETF股價資料
 
 ### 美股 ETF 股票代碼爬取 
-# https://tw.tradingview.com/markets/etfs/funds-usa/
+### https://tw.tradingview.com/markets/etfs/funds-usa/
 
 ### 透過已爬取的美股 ETF 股票代碼 去 Yahoo 爬取股票資料
+### https://tw.stock.yahoo.com/
+
 
 ### 安裝套件
     pip install yfinance
@@ -13,7 +15,7 @@
     pip install beautifulsoup4
 
 ### 手動建立 Output 資料夾
-
+![alt text](image.png)
 
 
 
