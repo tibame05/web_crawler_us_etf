@@ -1,4 +1,4 @@
-# 抓取 PTT 電影版的網頁原始碼（HTML)
+# 抓取 PTT Stock 版的網頁原始碼（HTML)
 import urllib.request as req
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
