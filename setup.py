@@ -19,6 +19,8 @@ setup(
     classifiers=[  # Optional
         "Development Status :: 3 - Alpha",
     ],
+    
+    packages=['crawler'],  # explicitly list them
     # packages=find_packages(where="src"),
     # package_dir={"": "src"},
 )

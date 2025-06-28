@@ -70,6 +70,8 @@ for r in ticker:
         print(f"[⚠️ 警告] 無法下載 {r} 的資料")
         failed_tickers.append(r)
         continue
+    df.columns = df.columns.droplevel(1)  # 把 'Price' 這層拿掉
+    
 
     df.reset_index(inplace=True)
     csv_name = os.path.join('Output', f"{r}.csv")
@@ -82,3 +84,4 @@ if failed_tickers:
         for ft in failed_tickers:
             f.write(ft + "\n")
     print(f"[⚠️ 已記錄] 無法下載的代碼已寫入 Output/failed_downloads.txt")
+    

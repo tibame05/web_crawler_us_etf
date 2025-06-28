@@ -7,19 +7,29 @@ Author-email: abc0970870@gmail.com
 Classifier: Development Status :: 3 - Alpha
 Description-Content-Type: text/markdown
 
-# web_crawler_us_etf
+# 爬取 Yahoo 美股ETF股價資料
 
-# crawler
+### 美股 ETF 股票代碼爬取 
+### https://tw.tradingview.com/markets/etfs/funds-usa/
 
-# 安裝套件
-pip install yfinance
-pip install pandas
-pip install requests
+### 透過已爬取的美股 ETF 股票代碼去 Yahoo 爬取股價資料
+### https://tw.stock.yahoo.com/
 
-pip install selenium
-pip install webdriver_manager
+# 查詢方式
+### 時間 : 2015-05-01 至目前網站最新股價資訊
+### 條件 : 僅抓取 2015-05-01 有股價資料
+### 欄位 : 日期、開盤、收盤、最高、最低、成交量
 
-# 建立 Output 資料夾
+
+### 安裝套件
+    pip install yfinance
+    pip install pandas
+    pip install requests
+    pip install selenium
+    pip install beautifulsoup4
+
+### 手動建立 Output 資料夾
+![alt text](image.png)
 
 
 
