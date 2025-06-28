@@ -4,7 +4,7 @@ services:
   crawler_producer:  # 定義一個服務
     image: peiyuji/web_crawler_us:${DOCKER_IMAGE_VERSION}  # 使用的映像檔名稱與標籤（版本）
     hostname: "crawler_producer"  # 設定 hostname
-    command: pipenv run python crawler/US_EFT_Yahoo_1.py
+    command: pipenv run python crawler/US_EFT_Yahoo.py
     # restart: always  # 若容器停止或崩潰，自動重新啟動
     environment:
       - TZ=Asia/Taipei  # 設定時區為台北（UTC+8）

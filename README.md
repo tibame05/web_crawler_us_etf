@@ -13,22 +13,27 @@
 
 
 ### 安裝套件
-    pip install yfinance
-    pip install pandas
-    pip install requests
-    pip install selenium
-    pip install beautifulsoup4
+    pipenv install yfinance
+    pipenv install pandas
+    pipenv install requests
+    pipenv install selenium
+    pipenv install beautifulsoup4
 
 ### 手動建立 Output 資料夾
 ![alt text](image.png)
 
 
+# crawler
 
 # 環境設定
 
 #### 安裝 pipenv
 
     pip install pipenv==2022.4.8
+
+#### set pipenv
+
+    pipenv --python ~/.pyenv/versions/3.8.10/bin/python
 
 #### 安裝 repo 套件
 
@@ -73,17 +78,21 @@
 
 #### build docker image
 
-    docker build -f Dockerfile -t linsamtw/tibame_crawler:0.0.1 .
-    docker build -f Dockerfile -t linsamtw/tibame_crawler:0.0.2 .
-    docker build -f with.env.Dockerfile -t linsamtw/tibame_crawler:0.0.3 .
-    docker build -f with.env.Dockerfile -t linsamtw/tibame_crawler:0.0.4 .
+    docker build -f Dockerfile -t peiyuji/web_crawler_us:0.0.1 .
+    docker build -f Dockerfile -t peiyuji/web_crawler_us:0.0.2 .
+    docker build -f with.env.Dockerfile -t peiyuji/web_crawler_us:0.0.3 .
+    docker build -f with.env.Dockerfile -t peiyuji/web_crawler_us:0.0.4 .
+    docker build -f with.env.Dockerfile -t peiyuji/web_crawler_us:0.0.5 .
+    docker build -f with.env.Dockerfile -t peiyuji/web_crawler_us:0.0.6 .
 
 #### push docker image
 
-    docker push linsamtw/tibame_crawler:0.0.1
-    docker push linsamtw/tibame_crawler:0.0.2
-    docker push linsamtw/tibame_crawler:0.0.3
-    docker push linsamtw/tibame_crawler:0.0.4
+    docker push peiyuji/web_crawler_us:0.0.1
+    docker push peiyuji/web_crawler_us:0.0.2
+    docker push peiyuji/web_crawler_us:0.0.3
+    docker push peiyuji/web_crawler_us:0.0.4
+    docker push peiyuji/web_crawler_us:0.0.5
+    docker push peiyuji/web_crawler_us:0.0.6
 
 #### 建立 network
 
@@ -97,20 +106,34 @@
 
     docker compose -f rabbitmq-network.yml down
 
+#### 啟動 mysql
+
+    docker compose -f mysql.yml up -d
+
+#### 關閉 mysql
+
+    docker compose -f mysql.yml down
+
 #### 啟動 worker
 
     docker compose -f docker-compose-worker-network.yml up -d
     DOCKER_IMAGE_VERSION=0.0.3 docker compose -f docker-compose-worker-network-version.yml up -d
+    DOCKER_IMAGE_VERSION=0.0.5 docker compose -f docker-compose-worker-network-version.yml up -d
+    DOCKER_IMAGE_VERSION=0.0.6 docker compose -f docker-compose-worker-network-version.yml up -d
 
 #### 關閉 worker
 
     docker compose -f docker-compose-worker-network.yml down
     DOCKER_IMAGE_VERSION=0.0.3 docker compose -f docker-compose-worker-network-version.yml down
+    DOCKER_IMAGE_VERSION=0.0.5 docker compose -f docker-compose-worker-network-version.yml down
+    DOCKER_IMAGE_VERSION=0.0.6 docker compose -f docker-compose-worker-network-version.yml down
 
 #### producer 發送任務
 
     docker compose -f docker-compose-producer-network.yml up -d
     DOCKER_IMAGE_VERSION=0.0.3 docker compose -f docker-compose-producer-network-version.yml up -d
+    DOCKER_IMAGE_VERSION=0.0.5 docker compose -f docker-compose-producer-network-version.yml up -d
+    DOCKER_IMAGE_VERSION=0.0.6 docker compose -f docker-compose-producer-duplicate-network-version.yml up -d
 
 #### 查看 docker container 狀況
 
@@ -128,4 +151,10 @@
 
     docker logs container_name
 
+#### 下載 taiwan_stock_price.csv
 
+    wget https://github.com/FinMind/FinMindBook/releases/download/data/taiwan_stock_price.csv
+
+#### 上傳 taiwan_stock_price.csv
+
+    pipenv run python crawler/upload_taiwan_stock_price_to_mysql.py
