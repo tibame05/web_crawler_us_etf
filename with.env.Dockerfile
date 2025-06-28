@@ -13,7 +13,13 @@ RUN pip install pipenv==2022.4.8
 RUN mkdir /crawler
 
 # 將當前目錄（與 Dockerfile 同層）所有內容複製到容器的 /crawler 資料夾
-COPY . /crawler/
+COPY ./crawler /crawler/crawler
+COPY ./setup.py /crawler
+COPY ./genenv.py /crawler
+COPY ./Pipfile /crawler
+COPY ./Pipfile.lock /crawler
+COPY ./README.md /crawler
+COPY ./local.ini /crawler
 
 # 設定容器的工作目錄為 /crawler，後續的指令都在這個目錄下執行
 WORKDIR /crawler/

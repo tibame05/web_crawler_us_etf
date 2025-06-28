@@ -20,7 +20,9 @@ def send_crawler_stock_price_task():
     # 一次發送多支股票代碼，讓 Celery 處理
     for stock_id in ["2330", "0050", "2317", "0056", "00713"]:
         logger.info(stock_id)  # 印出目前處理的股票代碼
-        crawler_finmind.delay(stock_id=stock_id)  # 非同步觸發任務（使用 Celery）
+        crawler_finmind.delay(
+            stock_id=stock_id
+        )  # 非同步觸發任務（使用 Celery）
 
 
 def main():
@@ -50,7 +52,9 @@ def main():
         second="0",  # 整點
         coalesce=True,
     )
-    logger.info("send_crawler_stock_price_task add scheduler")  # log 記錄啟用排程
+    logger.info(
+        "send_crawler_stock_price_task add scheduler"
+    )  # log 記錄啟用排程
     scheduler.start()  # 啟動排程器
 
 
