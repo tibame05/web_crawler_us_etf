@@ -1,4 +1,4 @@
-from crawler.tasks_US_EFT_Yahoo_1 import US_EFT_Yahoo_1
+from crawler.tasks_US_EFT_Yahoo import US_EFT_Yahoo
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -36,4 +36,4 @@ print("抓到的美股ETF代碼：")
 for stock_id in etf_codes:
     print(stock_id)
 
-    US_EFT_Yahoo_1.delay(stock_id=stock_id)
+    US_EFT_Yahoo.delay(stock_id=stock_id)

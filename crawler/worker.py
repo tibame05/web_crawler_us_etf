@@ -15,7 +15,7 @@ app = Celery(
         "crawler.tasks_crawler_finmind",
         "crawler.tasks_crawler_finmind_duplicate",
 
-        "crawler.tasks_US_EFT_Yahoo_1",
+        "crawler.tasks_US_EFT_Yahoo"
 
     ],
     # 連線到 rabbitmq,
