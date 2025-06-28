@@ -7,7 +7,7 @@ from crawler.config import MYSQL_ACCOUNT, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_PORT
 from crawler.worker import app
 
 
-def upload_data_to_mysql(df: pd.DataFrame):
+def upload_data_to_mysql_US_EFT_Yahoo(df: pd.DataFrame):
     # 定義資料庫連線字串（MySQL 資料庫）
     # 格式：mysql+pymysql://使用者:密碼@主機:port/資料庫名稱
     # 上傳到 mydb, 同學可切換成自己的 database
@@ -45,4 +45,4 @@ def US_EFT_Yahoo(tickers):
             continue
         df.columns = df.columns.droplevel(1)  # 把 'Price' 這層拿掉
         df.reset_index(inplace=True)
-        upload_data_to_mysql(df)
+        upload_data_to_mysql_US_EFT_Yahoo(df)

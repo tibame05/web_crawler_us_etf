@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import yfinance as yf
 from selenium import webdriver
@@ -7,7 +6,17 @@ from bs4 import BeautifulSoup
 import time
 import csv
 
-# 設定 Chrome Driver (headless 模式)
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from bs4 import BeautifulSoup
+import os
+import csv
+
+os.makedirs("Output", exist_ok=True)
+
 options = Options()
 options.add_argument("--headless")
 options.add_argument("--disable-gpu")
@@ -18,51 +27,38 @@ driver = webdriver.Chrome(options=options)
 url = "https://tw.tradingview.com/markets/etfs/funds-usa/"
 driver.get(url)
 
-time.sleep(5)  # 等待網頁及 JS 載入，必要時可調整秒數
+# 等待表格載入
+WebDriverWait(driver, 15).until(
+    EC.presence_of_element_located((By.CSS_SELECTOR, "table tbody tr"))
+)
 
 html = driver.page_source
 soup = BeautifulSoup(html, "html.parser")
 
-# 找出表格列，抓第一欄 ETF 代碼
+etf_data = []
+
+# 逐列抓取
 rows = soup.select("table tbody tr")
-etf_codes = []
 for row in rows:
-    tds = row.find_all("td")
-    if tds:
-        code = tds[0].get_text(strip=True)
-        etf_codes.append(code)
+    code_tag = row.select_one('a[href^="/symbols/"]')
+    name_tag = row.select_one("sup")
+    
+    if code_tag and name_tag:
+        code = code_tag.get_text(strip=True)
+        name = name_tag.get_text(strip=True)
+        etf_data.append((code, name))
 
 driver.quit()
 
-print("抓到的美股ETF代碼：")
-for c in etf_codes:
-    print(c)
-
-# 寫入 CSV 檔案
-with open("Output/us_etf_codes.csv", mode="w", newline="", encoding="utf-8") as file:
-    writer = csv.writer(file)
-    writer.writerow(["ETF代碼"])  # 寫入欄位名稱
-    for code in etf_codes:
-        writer.writerow([code])
-
-print("已成功寫入 us_etf_codes.csv")
-
-# 取前三碼英文函式
-def get_first_three_letters(code):
-    letters = ''.join([ch for ch in code if ch.isalpha()])  # 過濾出英文字母
-    return letters[:3].upper()  # 取前三個字母並轉大寫
-
-# 修改你的主要程式碼片段，把 etf_codes 轉成前三碼英文
-etf_codes_short = [get_first_three_letters(code) for code in etf_codes]
-print(etf_codes)
-
-ticker = etf_codes_short
+etf_codes = [code for code, _ in etf_data]
+print("所有ETF代碼：")
+    
 start_date = '2015-05-01'
 end_date = pd.Timestamp.today().strftime('%Y-%m-%d')
 
 failed_tickers = []
 
-for r in ticker:
+for r in etf_codes:
     print(f"正在下載：{r}")
     df = yf.download(r, start=start_date, end=end_date)
     
@@ -72,7 +68,6 @@ for r in ticker:
         continue
     df.columns = df.columns.droplevel(1)  # 把 'Price' 這層拿掉
     
-
     df.reset_index(inplace=True)
     csv_name = os.path.join('Output', f"{r}.csv")
     df.to_csv(csv_name, encoding="utf-8", index=False)

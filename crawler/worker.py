@@ -12,6 +12,7 @@ app = Celery(
     # 只包含 tasks.py 裡面的程式, 才會成功執行
     include=[
         "crawler.tasks",
+        "crawler.tasks_US_ETF_list",
         "crawler.tasks_US_EFT_Yahoo"
 
     ],
