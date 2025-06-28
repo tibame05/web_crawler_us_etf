@@ -1,4 +1,4 @@
-from crawler.tasks_US_EFT_Yahoo_2 import US_EFT_Yahoo_1
+from crawler.tasks_US_EFT_Yahoo_1 import US_EFT_Yahoo_1
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
