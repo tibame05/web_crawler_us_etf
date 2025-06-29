@@ -12,7 +12,8 @@
 ### 欄位 : 日期、開盤、收盤、最高、最低、成交量
 
 
-    
+    pipenv run python crawler/TEST_upload_data_to_mysql.py
+    pipenv run python crawler/upload_data_to_mysql.py
 ### 安裝套件
     pipenv install yfinance
     pipenv install pandas
