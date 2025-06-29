@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import os
 import csv
-
+import pandas as pd
 os.makedirs("Output", exist_ok=True)
 
 options = Options()
@@ -41,6 +41,10 @@ for row in rows:
         etf_data.append((code, name))
 
 driver.quit()
+
+df = pd.DataFrame(etf_data, columns=['Stock_ID', 'ETF_Name'])
+
+print(df)
 
 print("抓到的美股ETF代碼與名稱：")
 for code, name in etf_data:

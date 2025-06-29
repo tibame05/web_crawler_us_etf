@@ -11,8 +11,6 @@
 ### 條件 : 僅抓取 2015-05-01 有股價資料
 ### 欄位 : 日期、開盤、收盤、最高、最低、成交量
 
-# 
-    docker logs  web_crawler_us_etf-producer_multi_queue-1
 
     
 ### 安裝套件
@@ -135,6 +133,10 @@
     DOCKER_IMAGE_VERSION=0.0.5 docker compose -f docker-compose-producer-network-version.yml up -d
     DOCKER_IMAGE_VERSION=0.0.6 docker compose -f docker-compose-producer-duplicate-network-version.yml up -d
 
+# 
+    docker logs  web_crawler_us_etf-producer_multi_queue-1
+
+    docker logs -f web_crawler_us_etf-crawler_US_ETF_list-1
 #### 查看 docker container 狀況
 
     docker ps -a

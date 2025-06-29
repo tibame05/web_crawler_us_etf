@@ -66,4 +66,7 @@ def US_ETF_list(url):
             etf_data.append((code, name))
 
     driver.quit()
-    upload_data_to_mysql_US_ETF_list(etf_data)
+    driver.quit()
+
+    df = pd.DataFrame(etf_data, columns=['Stock_ID', 'ETF_Name'])
+    upload_data_to_mysql_US_ETF_list(df)
