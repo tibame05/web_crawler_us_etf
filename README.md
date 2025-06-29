@@ -19,9 +19,6 @@
     pipenv install selenium
     pipenv install beautifulsoup4
 
-### 手動建立 Output 資料夾
-![alt text](image.png)
-
 
 # crawler
 

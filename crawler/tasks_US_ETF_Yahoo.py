@@ -1,5 +1,5 @@
 import yfinance as yf
-
+import os
 import pandas as pd
 from sqlalchemy import create_engine  # 建立資料庫連線的工具（SQLAlchemy）
 
@@ -35,14 +35,32 @@ def US_EFT_Yahoo(tickers):
 
     failed_tickers = []
 
+
     for r in ticker:
         print(f"正在下載：{r}")
-        df = yf.download(r, start=start_date, end=end_date)
-        
-        if df.empty:
-            print(f"[⚠️ 警告] 無法下載 {r} 的資料")
+        try:
+            df = yf.download(r, start=start_date, end=end_date)
+            if df.empty:
+                raise ValueError("下載結果為空")
+        except Exception as e:
+            print(f"[⚠️ 錯誤] {r} 下載失敗：{e}")
             failed_tickers.append(r)
             continue
         df.columns = df.columns.droplevel(1)  # 把 'Price' 這層拿掉
         df.reset_index(inplace=True)
+
+        # 新增一欄「Ticker」
+        df.insert(0, "Stock_ID", r)
+
+        csv_name = os.path.join('Output', f"{r}.csv")
+        df.to_csv(csv_name, encoding="utf-8", index=False)
+        print(f"[✅ 完成] 已儲存 {csv_name}")
+
+        
+    # 寫入失敗清單
+    if failed_tickers:
+        with open("Output/failed_downloads.txt", "w", encoding="utf-8") as f:
+            for ft in failed_tickers:
+                f.write(ft + "\n")
+        print(f"[⚠️ 已記錄] 無法下載的代碼已寫入 Output/failed_downloads.txt")
     upload_data_to_mysql_US_ETF_Yahoo(df)
