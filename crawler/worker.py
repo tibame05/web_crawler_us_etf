@@ -13,7 +13,7 @@ app = Celery(
     include=[
         "crawler.tasks",
         "crawler.tasks_US_ETF_list",
-        "crawler.tasks_US_EFT_Yahoo"
+        "crawler.tasks_US_ETF_Yahoo"
 
     ],
     # 連線到 rabbitmq,
