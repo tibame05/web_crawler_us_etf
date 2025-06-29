@@ -35,7 +35,7 @@ def upload_data_to_mysql_US_ETF_list(df: pd.DataFrame):
 
 # 註冊 task, 有註冊的 task 才可以變成任務發送給 rabbitmq
 @app.task()
-def US_EFT_Yahoo(url):
+def US_ETF_Yahoo(url):
     os.makedirs("Output", exist_ok=True)
 
     options = Options()
