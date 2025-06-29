@@ -14,7 +14,8 @@ app = Celery(
         "crawler.tasks",
         "crawler.tasks_US_ETF_list",
         "crawler.tasks_US_ETF_Yahoo",
-        "crawler.tasks_US_ETF_Yahoo_DPS"
+        "crawler.tasks_US_ETF_Yahoo_DPS",
+  
 
     ],
     # 連線到 rabbitmq,

@@ -1,11 +1,8 @@
 import yfinance as yf
-import os
 import pandas as pd
 from sqlalchemy import create_engine  # 建立資料庫連線的工具（SQLAlchemy）
-
 from crawler.config import MYSQL_ACCOUNT, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_PORT
 from crawler.worker import app
-
 
 def upload_data_to_mysql_US_ETF_Yahoo(df: pd.DataFrame):
     # 定義資料庫連線字串（MySQL 資料庫）
@@ -28,15 +25,12 @@ def upload_data_to_mysql_US_ETF_Yahoo(df: pd.DataFrame):
 
 # 註冊 task, 有註冊的 task 才可以變成任務發送給 rabbitmq
 @app.task()
-def US_EFT_Yahoo(tickers):
-    ticker = tickers
+def US_ETF_Yahoo(tickers):
     start_date = '2015-05-01'
     end_date = pd.Timestamp.today().strftime('%Y-%m-%d')
+    failed_tickers = [] 
 
-    failed_tickers = []
-
-
-    for r in ticker:
+    for r in tickers:
         print(f"正在下載：{r}")
         try:
             df = yf.download(r, start=start_date, end=end_date)
@@ -51,16 +45,4 @@ def US_EFT_Yahoo(tickers):
 
         # 新增一欄「Ticker」
         df.insert(0, "Stock_ID", r)
-
-        csv_name = os.path.join('Output', f"{r}.csv")
-        df.to_csv(csv_name, encoding="utf-8", index=False)
-        print(f"[✅ 完成] 已儲存 {csv_name}")
-
-        
-    # 寫入失敗清單
-    if failed_tickers:
-        with open("Output/failed_downloads.txt", "w", encoding="utf-8") as f:
-            for ft in failed_tickers:
-                f.write(ft + "\n")
-        print(f"[⚠️ 已記錄] 無法下載的代碼已寫入 Output/failed_downloads.txt")
     upload_data_to_mysql_US_ETF_Yahoo(df)

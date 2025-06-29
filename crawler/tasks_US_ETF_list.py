@@ -4,8 +4,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
-import os
-import csv
 
 import pandas as pd
 from sqlalchemy import create_engine  # 建立資料庫連線的工具（SQLAlchemy）
@@ -35,9 +33,7 @@ def upload_data_to_mysql_US_ETF_list(df: pd.DataFrame):
 
 # 註冊 task, 有註冊的 task 才可以變成任務發送給 rabbitmq
 @app.task()
-def US_ETF_Yahoo_list(url):
-    os.makedirs("Output", exist_ok=True)
-
+def US_ETF_list(url):
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
@@ -70,14 +66,4 @@ def US_ETF_Yahoo_list(url):
             etf_data.append((code, name))
 
     driver.quit()
-
-    print("抓到的美股ETF代碼與名稱：")
-    for code, name in etf_data:
-        print(f"{code} - {name}")
-
-    with open("Output/us_etf_list.csv", "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["ETF代碼", "ETF名稱"])
-        writer.writerows(etf_data)
-    print("已成功寫入 us_etf_list.csv")
     upload_data_to_mysql_US_ETF_list(etf_data)

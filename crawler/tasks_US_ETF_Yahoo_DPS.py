@@ -4,7 +4,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import time
-import csv
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -12,14 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
-import os
-import csv
 
-
-
-import yfinance as yf
-import os
-import pandas as pd
 from sqlalchemy import create_engine  # 建立資料庫連線的工具（SQLAlchemy）
 
 from crawler.config import MYSQL_ACCOUNT, MYSQL_HOST, MYSQL_PASSWORD, MYSQL_PORT
@@ -57,8 +49,6 @@ def US_ETF_Yahoo_DPS(tickers):
             dividends_df = dividends.reset_index()
             dividends_df.columns = ["Ex-Dividend Date", "Dividend Per Unit"]    # 調整欄位名稱
             dividends_df.insert(0, "Stock_ID", ticker)  # 新增股票代碼欄位，放第一欄
-            csv_name = os.path.join('Output/output_dividends', f"{ticker}_dividends.csv")
-            dividends_df.to_csv(csv_name, encoding="utf-8", index=False)
         else:
             print(f"{ticker} 沒有配息資料")        
     upload_data_to_mysql_US_ETF_Yahoo_DPS(dividends_df)
