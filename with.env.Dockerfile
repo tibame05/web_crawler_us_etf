@@ -31,11 +31,6 @@ RUN pipenv sync
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-RUN apt-get update && apt-get install -y wget gnupg unzip \
-    && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update && apt-get install -y google-chrome-stable
-    
 # 設定語系環境變數，避免 Python 編碼問題
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
