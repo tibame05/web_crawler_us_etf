@@ -17,7 +17,7 @@ from sqlalchemy import create_engine  # 建立資料庫連線的工具（SQLAlch
 
 
 
-def upload_data_to_mysql_US_ETF_list(df: pd.DataFrame):
+if __name__ == "__main__":
     # 定義資料庫連線字串（MySQL 資料庫）
     # 格式：mysql+pymysql://使用者:密碼@主機:port/資料庫名稱
     address = "mysql+pymysql://root:test@127.0.0.1:3306/mydb"

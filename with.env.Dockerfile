@@ -25,9 +25,11 @@ COPY ./local.ini /crawler
 WORKDIR /crawler/
 
 # 根據 Pipfile.lock 安裝所有依賴（確保環境一致性）
-RUN pipenv sync
+RUN pipenv sync 
 
-RUN pipenv install selenium==4.27.1
+# 設定語系環境變數，避免 Python 編碼問題
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 
 RUN apt-get update && apt-get install -y wget gnupg unzip \
     && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
@@ -43,3 +45,6 @@ RUN ENV=DOCKER python3 genenv.py
 
 # 啟動容器後，預設執行 bash（開啟終端）
 CMD ["/bin/bash"]
+
+RUN pipenv install selenium==4.27.1
+
