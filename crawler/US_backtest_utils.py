@@ -53,7 +53,7 @@ start_date = '2015-05-01'
 end_date = pd.Timestamp.today().strftime('%Y-%m-%d')
 
 failed_tickers = []
-
+summary_df = [] 
 for r in etf_codes:
     print(f"正在下載：{r}")
     try:
@@ -116,3 +116,64 @@ for r in etf_codes:
 
 
    
+
+
+
+
+   
+    # 確保 date 欄位為 datetime
+    if not pd.api.types.is_datetime64_any_dtype(df["date"]):
+        df["date"] = pd.to_datetime(df["date"])
+
+    # 回測期間
+    backtest_start = df["date"].iloc[0].strftime("%Y-%m-%d")
+    backtest_end = df["date"].iloc[-1].strftime("%Y-%m-%d")
+    print(backtest_start, backtest_end)
+    # 總報酬率（Total Return）
+    # 增加該日報酬率與累積報酬指數
+    df['daily_return'] = df['adj_close'].pct_change()
+    df['cumulative_return'] = (1 + df['daily_return']).cumprod()
+    total_return = df['cumulative_return'].iloc[-1] - 1
+
+    # 年化報酬率（CAGR）
+    days = (df["date"].iloc[-1] - df["date"].iloc[0]).days
+
+    if days <= 0 or df['cumulative_return'].iloc[-1] <= 0:
+        cagr = np.nan
+    else:
+        cagr = df['cumulative_return'].iloc[-1] ** (365 / days) - 1
+
+    # 最大回撤（Max Drawdown）
+    roll_max = df['cumulative_return'].cummax()
+    drawdown = df['cumulative_return'] / roll_max - 1
+    max_drawdown = drawdown.min()
+
+    # 夏普比率（Sharpe Ratio）
+    std_return = df['daily_return'].std()
+    sharpe = np.sqrt(252) * df['daily_return'].mean() / std_return if std_return and std_return != 0 else np.nan
+    
+    
+    summary_data = {
+        "etf_id": r,
+        "backtest_start": backtest_start,
+        "backtest_end": backtest_end,
+        "total_return": total_return,
+        "cagr": cagr,
+        "max_drawdown": max_drawdown,
+        "sharpe_ratio": sharpe
+        }
+
+    summary_df.append(summary_data)
+
+summary_df = pd.DataFrame(summary_df)
+# 指定欄位輸出順序
+desired_order = ["etf_id", "backtest_start", "backtest_end", "total_return", "cagr", "max_drawdown", "sharpe_ratio"]
+summary_df = summary_df[desired_order]
+
+performance_dir = "Output/output_backtesting_metrics"     # 儲存績效評估報表
+os.makedirs(performance_dir, exist_ok=True)
+
+summary_csv_path = os.path.join(performance_dir, "backtesting_performance_summary.csv")
+summary_df.to_csv(summary_csv_path, index=False)
+
+print("✅ 技術指標與績效分析完成")
