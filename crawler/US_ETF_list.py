@@ -38,8 +38,8 @@ for row in rows:
     if code_tag and name_tag:
         code = code_tag.get_text(strip=True)
         name = name_tag.get_text(strip=True)
-        region = "US"  # 手動補上固定幣別
-        currency = "USD"  # 手動補上固定幣別
+        region = "US"  # 手動補上國別
+        currency = "USD"  # 手動補上幣別
         etf_data.append((code, name,region,currency))
 
 driver.quit()

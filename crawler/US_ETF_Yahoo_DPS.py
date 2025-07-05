@@ -6,14 +6,11 @@ from bs4 import BeautifulSoup
 import time
 import csv
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from bs4 import BeautifulSoup
 import os
-import csv
+
 
 dividend_dir = "Output/output_dividends"
 os.makedirs(dividend_dir, exist_ok=True)
@@ -46,20 +43,23 @@ for row in rows:
     if code_tag and name_tag:
         code = code_tag.get_text(strip=True)
         name = name_tag.get_text(strip=True)
+        #currency = "USD"  # 固定幣別
         etf_data.append((code, name))
 
 driver.quit()
-
+#df = pd.DataFrame(etf_data, columns=['id', 'name','region','currency'])
+#etf_df = pd.DataFrame(etf_data, columns=['id', 'name', 'currency'])
 etf_codes = [code for code, _ in etf_data]
-print("所有ETF代碼：")
-    
+
 for ticker in etf_codes:
     # 抓取配息資料
     dividends = yf.Ticker(ticker).dividends
     if not dividends.empty:
         dividends_df = dividends.reset_index()
-        dividends_df.columns = ["Ex-Dividend Date", "Dividend Per Unit"]    # 調整欄位名稱
-        dividends_df.insert(0, "Stock_ID", ticker)  # 新增股票代碼欄位，放第一欄
+        dividends_df.columns = ["date", "dividend_per_unit"]    # 調整欄位名稱
+        dividends_df["date"] = dividends_df["date"].dt.date  # 只保留年月日
+        dividends_df.insert(0, "etf_id", ticker)  # 新增股票代碼欄位，放第一欄
+        dividends_df.insert(3, "currency", "USD")  # 新增欄位，放第一欄
         dividends_df.to_csv(f"{dividend_dir}/{ticker}_dividends.csv", index=False, encoding="utf-8-sig")
     else:
-        print(f"{ticker} 沒有配息資料")    
+        print(f"{ticker} 沒有配息資料")

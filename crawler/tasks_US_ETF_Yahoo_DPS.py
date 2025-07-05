@@ -42,13 +42,16 @@ def upload_data_to_mysql_US_ETF_Yahoo_DPS(df: pd.DataFrame):
 @app.task()
 def US_ETF_Yahoo_DPS(tickers):
 
-    for ticker in tickers:
+    for ticker in etf_codes:
         # 抓取配息資料
         dividends = yf.Ticker(ticker).dividends
         if not dividends.empty:
             dividends_df = dividends.reset_index()
-            dividends_df.columns = ["Ex-Dividend Date", "Dividend Per Unit"]    # 調整欄位名稱
-            dividends_df.insert(0, "Stock_ID", ticker)  # 新增股票代碼欄位，放第一欄
+            dividends_df.columns = ["date", "dividend_per_unit"]    # 調整欄位名稱
+            dividends_df["date"] = dividends_df["date"].dt.date  # 只保留年月日
+            dividends_df.insert(0, "etf_id", ticker)  # 新增股票代碼欄位，放第一欄
+            dividends_df.insert(3, "currency", "USD")  # 新增欄位，放第一欄
+            dividends_df.to_csv(f"{dividend_dir}/{ticker}_dividends.csv", index=False, encoding="utf-8-sig")
         else:
-            print(f"{ticker} 沒有配息資料")        
+            print(f"{ticker} 沒有配息資料")     
     upload_data_to_mysql_US_ETF_Yahoo_DPS(dividends_df)
