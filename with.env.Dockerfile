@@ -31,10 +31,6 @@ RUN pipenv sync
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-# 設定語系環境變數，避免 Python 編碼問題
-ENV LC_ALL=C.UTF-8
-ENV LANG=C.UTF-8
-
 # 建立 .env
 RUN ENV=DOCKER python3 genenv.py
 

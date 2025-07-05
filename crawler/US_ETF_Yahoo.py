@@ -61,7 +61,9 @@ failed_tickers = []
 for r in etf_codes:
     print(f"正在下載：{r}")
     try:
-        df = yf.download(r, start=start_date, end=end_date)
+        df = yf.download(r, start=start_date, end=end_date, auto_adjust=False)
+        df = df[df["Volume"] > 0].ffill()
+        df.rename(columns={"Adj Close": "Adj_Close"}, inplace=True)
         if df.empty:
             raise ValueError("下載結果為空")
     except Exception as e:
