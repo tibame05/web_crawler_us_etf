@@ -1,4 +1,4 @@
-id,name,region,currency
+etf_id,etf_name,region,currency
 VOO,Vanguard S&P 500 ETF,US,USD
 SPY,SPDR S&P 500 ETF TRUST,US,USD
 IVV,iShares Core S&P 500 ETF,US,USD

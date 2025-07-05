@@ -6,16 +6,12 @@ from bs4 import BeautifulSoup
 import time
 import csv
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from bs4 import BeautifulSoup
 import os
-import csv
 
-os.makedirs("Output", exist_ok=True)
+os.makedirs("Output/historical_price_data", exist_ok=True)
 
 options = Options()
 options.add_argument("--headless")
@@ -51,7 +47,6 @@ for row in rows:
 driver.quit()
 
 etf_codes = [code for code, _ in etf_data]
-print("所有ETF代碼：")
     
 start_date = '2015-05-01'
 end_date = pd.Timestamp.today().strftime('%Y-%m-%d')
@@ -63,7 +58,16 @@ for r in etf_codes:
     try:
         df = yf.download(r, start=start_date, end=end_date, auto_adjust=False)
         df = df[df["Volume"] > 0].ffill()
-        df.rename(columns={"Adj Close": "Adj_Close"}, inplace=True)
+        df.reset_index(inplace=True)
+        df.rename(columns={
+            "Date": "date",
+            "Adj Close": "adj_close",
+            "Close": "close",
+            "High": "high",
+            "Low": "low",
+            "Open": "open",
+            "Volume": "volume"
+        }, inplace=True)
         if df.empty:
             raise ValueError("下載結果為空")
     except Exception as e:
@@ -71,18 +75,19 @@ for r in etf_codes:
         failed_tickers.append(r)
         continue
     df.columns = df.columns.droplevel(1)  # 把 'Price' 這層拿掉
-    df.reset_index(inplace=True)
 
-    # 新增一欄「Ticker」
-    df.insert(0, "Stock_ID", r)
-
-    csv_name = os.path.join('Output', f"{r}.csv")
+    df.insert(0, "etf_id", r)  # 新增一欄「etf_id」
+    print (df)
+    #df.columns = ["etf_id","date", "dividend_per_unit"]    # 調整欄位名稱
+    columns_order = ['etf_id', 'date', 'adj_close','close','high', 'low', 'open','volume']
+    df = df[columns_order]
+    csv_name = os.path.join('Output/historical_price_data', f"{r}.csv")
     df.to_csv(csv_name, encoding="utf-8", index=False)
     print(f"[✅ 完成] 已儲存 {csv_name}")
 
 # 寫入失敗清單
 if failed_tickers:
-    with open("Output/failed_downloads.txt", "w", encoding="utf-8") as f:
+    with open("Output/historical_price_data/failed_downloads.txt", "w", encoding="utf-8") as f:
         for ft in failed_tickers:
             f.write(ft + "\n")
     print(f"[⚠️ 已記錄] 無法下載的代碼已寫入 Output/failed_downloads.txt")

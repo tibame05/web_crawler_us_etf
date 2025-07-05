@@ -20,7 +20,8 @@ Description-Content-Type: text/markdown
 ### 條件 : 僅抓取 2015-05-01 有股價資料
 ### 欄位 : 日期、開盤、收盤、最高、最低、成交量
 
-
+    sudo lsof -i :3306
+    sudo systemctl stop mysql
     pipenv run python crawler/TEST_upload_data_to_mysql.py
     pipenv run python crawler/upload_data_to_mysql.py
 ### 安裝套件

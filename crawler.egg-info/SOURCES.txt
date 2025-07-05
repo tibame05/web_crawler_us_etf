@@ -1,4 +1,5 @@
 README.md
+pyproject.toml
 setup.py
 crawler/TEST_upload_data_to_mysql.py
 crawler/US_ETF_Alpha_Vantage_API.py

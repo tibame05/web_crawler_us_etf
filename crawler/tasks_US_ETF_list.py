@@ -69,5 +69,5 @@ def US_ETF_list(url):
 
     driver.quit()
 
-    df = pd.DataFrame(etf_data, columns=['id', 'name','region','currency'])
+    df = pd.DataFrame(etf_data, columns=['etf_id', 'etf_name','region','currency'])
     upload_data_to_mysql_US_ETF_list(df)

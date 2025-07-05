@@ -2,72 +2,117 @@ import pandas as pd
 import numpy as np
 import pandas_ta as ta
 import os
+import yfinance as yf
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from bs4 import BeautifulSoup
+import time
+import csv
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-from crawler.worker import app
+os.makedirs("Output/historical_price_data", exist_ok=True)
 
-# 🎯 任務 1：計算各項技術指標（RSI, MA, MACD, KD）
+options = Options()
+options.add_argument("--headless")
+options.add_argument("--disable-gpu")
+options.add_argument("--no-sandbox")
 
-"""
-對傳入的股價資料 DataFrame 計算技術分析指標，並回傳含技術指標的 DataFrame。
-指標包含：
-- RSI（14日）
-- 移動平均線（MA5, MA20）
-- MACD（快線、慢線、柱狀圖）
-- KD 隨機指標（%K, %D）
-"""
+driver = webdriver.Chrome(options=options)
 
-# RSI (相對強弱指標)
-df['RSI'] = ta.rsi(df['Close'], length=14)
+url = "https://tw.tradingview.com/markets/etfs/funds-usa/"
+driver.get(url)
 
-# MA5 和 MA20（也可以使用 ta.sma(df['Close'], length=5)）
-df['MA5'] = df['Close'].rolling(5).mean()
-df['MA20'] = df['Close'].rolling(20).mean()
+# 等待表格載入
+WebDriverWait(driver, 15).until(
+    EC.presence_of_element_located((By.CSS_SELECTOR, "table tbody tr"))
+)
 
-# MACD（移動平均收斂背離）
-macd = ta.macd(df['Close'], fast=12, slow=26, signal=9)
-df['MACD'] = macd['MACD_12_26_9']
-df['MACD_Signal'] = macd['MACDs_12_26_9']
-df['MACD_Hist'] = macd['MACDh_12_26_9']
+html = driver.page_source
+soup = BeautifulSoup(html, "html.parser")
 
-# KD 指標（STOCH: 隨機指標）
-stoch = ta.stoch(df['High'], df['Low'], df['Close'], k=14, d=3, smooth_k=3)
-df['%K'] = stoch['STOCHk_14_3_3']
-df['%D'] = stoch['STOCHd_14_3_3']
+etf_data = []
 
-return df
+# 逐列抓取
+rows = soup.select("table tbody tr")
+for row in rows:
+    code_tag = row.select_one('a[href^="/symbols/"]')
+    name_tag = row.select_one("sup")
+    
+    if code_tag and name_tag:
+        code = code_tag.get_text(strip=True)
+        name = name_tag.get_text(strip=True)
+        etf_data.append((code, name))
 
-# 🎯 任務 2：計算策略績效評估指標
-@app.task()
-def evaluate_performance(df):
-"""
-根據含 Adj_Close 的股價資料，計算回測績效指標並以 dict 回傳：
-- 總報酬率（Total Return）
-- 年化報酬率（CAGR）
-- 最大回撤（Max Drawdown）
-- 夏普比率（Sharpe Ratio）
-"""
+driver.quit()
 
-# 總報酬率（Total Return）
-df['Return'] = df['Adj_Close'].pct_change()
-df['Cumulative'] = (1 + df['Return']).cumprod()
-total_return = df['Cumulative'].iloc[-1] - 1
+etf_codes = [code for code, _ in etf_data]
+    
+start_date = '2015-05-01'
+end_date = pd.Timestamp.today().strftime('%Y-%m-%d')
 
-# 年化報酬率（CAGR）
-days = (df.index[-1] - df.index[0]).days
-cagr = (df['Cumulative'].iloc[-1]) ** (365 / days) - 1 if days > 0 else np.nan
+failed_tickers = []
 
-# 最大回撤（Max Drawdown）
-roll_max = df['Cumulative'].cummax()
-drawdown = df['Cumulative'] / roll_max - 1
-max_drawdown = drawdown.min()
+for r in etf_codes:
+    print(f"正在下載：{r}")
+    try:
+        df = yf.download(r, start=start_date, end=end_date, auto_adjust=False)
+        df = df[df["Volume"] > 0].ffill()
+        df.reset_index(inplace=True)
+        df.rename(columns={
+            "Date": "date",
+            "Adj Close": "adj_close",
+            "Close": "close",
+            "High": "high",
+            "Low": "low",
+            "Open": "open",
+            "Volume": "volume"
+        }, inplace=True)
+        if df.empty:
+            raise ValueError("下載結果為空")
+    except Exception as e:
+        print(f"[⚠️ 錯誤] {r} 下載失敗：{e}")
+        failed_tickers.append(r)
+        continue
+    df.columns = df.columns.droplevel(1)  # 把 'Price' 這層拿掉
 
-# 夏普比率（Sharpe Ratio）
-sharpe = np.sqrt(252) * df['Return'].mean() / df['Return'].std() if df['Return'].std() != 0 else np.nan
+    
+    # RSI (14) (相對強弱指標)
+    df["rsi"] = ta.rsi(df["close"], length=14)
 
-return {
-    "Total Return": total_return,
-    "CAGR": cagr,
-    "Max Drawdown": max_drawdown,
-    "Sharpe Ratio": sharpe
-}
+    # MA5、MA20（移動平均線）（也可以使用 df['close'].rolling(5).mean())）
+    df["ma5"] = ta.sma(df["close"], length=5)
+    df["ma20"] = ta.sma(df["close"], length=20)
 
+    # MACD（移動平均收斂背離指標）
+    macd = ta.macd(df["close"], fast=12, slow=26, signal=9)
+    df["macd_line"] = macd["MACD_12_26_9"]
+    df["macd_signal"] = macd["MACDs_12_26_9"]
+    df["macd_hist"] = macd["MACDh_12_26_9"]
+
+    # KD 指標（STOCH: 隨機震盪指標）
+    stoch = ta.stoch(df["high"], df["low"], df["close"], k=14, d=3, smooth_k=3)
+    df["pct_k"] = stoch["STOCHk_14_3_3"]
+    df["pct_d"] = stoch["STOCHd_14_3_3"]
+
+    # 增加該日報酬率與累積報酬指數
+    df['daily_return'] = df['adj_close'].pct_change()
+    df['cumulative_return'] = (1 + df['daily_return']).cumprod()
+    df.insert(0, "etf_id", r)  # 新增一欄「etf_id」
+    print (df)
+    #df.columns = ["etf_id","date", "dividend_per_unit"]    # 調整欄位名稱
+    columns_order = ['etf_id', 'date', 'adj_close','close','high', 'low', 'open','volume',
+                     'rsi', 'ma5', 'ma20', 'macd_line', 'macd_signal', 'macd_hist',
+                     'pct_k', 'pct_d', 'daily_return', 'cumulative_return']
+    df = df[columns_order]
+    # 儲存技術指標結果
+    print("開始 2️⃣ 進行技術指標計算與績效分析")
+    output_dir = "Output/output_with_indicators"              # 存儲含技術指標的結果
+    os.makedirs(output_dir, exist_ok=True)
+    csv_name = os.path.join(output_dir, f"{r}_with_indicators.csv")
+    df.to_csv(csv_name, encoding="utf-8", index=False)
+
+
+
+   
