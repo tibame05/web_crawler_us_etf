@@ -63,10 +63,11 @@ def US_ETF_list(url):
         if code_tag and name_tag:
             code = code_tag.get_text(strip=True)
             name = name_tag.get_text(strip=True)
-            etf_data.append((code, name))
+            region = "US"  # 手動補上固定幣別
+            currency = "USD"  # 手動補上固定幣別
+            etf_data.append((code, name,region,currency))
 
     driver.quit()
-    driver.quit()
 
-    df = pd.DataFrame(etf_data, columns=['Stock_ID', 'ETF_Name'])
+    df = pd.DataFrame(etf_data, columns=['id', 'name','region','currency'])
     upload_data_to_mysql_US_ETF_list(df)

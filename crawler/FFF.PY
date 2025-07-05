@@ -34,28 +34,15 @@ rows = soup.select("table tbody tr")
 for row in rows:
     code_tag = row.select_one('a[href^="/symbols/"]')
     name_tag = row.select_one("sup")
-    
+    cols = row.find_all("td")
     if code_tag and name_tag:
         code = code_tag.get_text(strip=True)
         name = name_tag.get_text(strip=True)
-        region = "US"  # 手動補上固定幣別
-        currency = "USD"  # 手動補上固定幣別
-        etf_data.append((code, name,region,currency))
+        currency = cols[4].get_text(strip=True)
+        country = cols[5].get_text(strip=True)
+        etf_data.append((code, name))
 
 driver.quit()
 
-df = pd.DataFrame(etf_data, columns=['id', 'name','region','currency'])
-
-for row in rows[:3]:  # 測試前3列
-    cols = row.find_all("td")
-    print([col.text.strip() for col in cols])
-
-print("抓到的美股ETF代碼與名稱：")
-for code, name, region, currency in etf_data:
-    print(f"{code} - {name}- {region}- {currency}")
-
-with open("Output/us_etf_list.csv", "w", newline="", encoding="utf-8") as f:
-    writer = csv.writer(f)
-    writer.writerow(['id', 'name','region','currency'])
-    writer.writerows(etf_data)
-print("已成功寫入 us_etf_list.csv")
+df = pd.DataFrame(etf_data, columns=['id', 'name'])
+print(df)
