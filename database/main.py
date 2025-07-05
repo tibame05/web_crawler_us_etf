@@ -37,15 +37,15 @@ conn.execute(
 
 # 指定連到 etf 資料庫
 engine = create_engine(
-    f"mysql+pymysql://{MYSQL_ACCOUNT}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/etf",
+    f"mysql+pymysql://{MYSQL_ACCOUNT}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/us_etf",
     # echo=True,  # 所有 SQL 指令都印出來（debug 用）
     pool_pre_ping=True,  # 連線前先 ping 一下，確保連線有效
 )
 
 # 建立 etfs、etf_daily_price 資料表（如果不存在）
 metadata = MetaData()
-etfs_table = Table(
-    "etfs",
+us_etfs_table = Table(
+    "us_etfs",
     metadata,
     Column("id", VARCHAR(20), primary_key=True),  # ETF 代碼
     Column("name", VARCHAR(100)),  # ETF 名稱
@@ -53,8 +53,8 @@ etfs_table = Table(
     Column("currency", VARCHAR(10)),  # 幣別
 )
 
-etf_daily_price_table = Table(
-    "etf_daily_price",
+us_etf_daily_price_table = Table(
+    "us_etf_daily_price",
     metadata,
     Column("etf_id", VARCHAR(20), ForeignKey("etfs.id"), primary_key=True),  # ETF 代碼
     Column("date", Date, primary_key=True),  # 日期
@@ -68,52 +68,17 @@ etf_daily_price_table = Table(
 # 如果資料表不存在，則建立它們
 metadata.create_all(engine)
 
-
-# 假資料
-df_etfs = pd.DataFrame(
-    [
-        {"id": "0050", "name": "test1", "region": "TW", "currency": "TWD"},
-        {"id": "0010", "name": "test2", "region": "USD", "currency": "USD"},
-    ]
-)
-
-df_etf_daily_price = pd.DataFrame(
-    [
-        {
-            "etf_id": "0050",
-            "date": "2025-07-04",
-            "open": 100.55,
-            "high": 200.55,
-            "low": 50.55,
-            "close": 100.00,
-            "adj_close": 230.00,
-            "volume": 10000,
-        },
-        {
-            "etf_id": "0010",
-            "date": "2025-07-04",
-            "open": 100.55,
-            "high": 200.55,
-            "low": 50.55,
-            "close": 100.00,
-            "adj_close": 230.00,
-            "volume": 30000,
-        },
-    ]
-)
-
-
 # 遍歷 單筆寫入資料
 for _, row in df_etfs.iterrows():
     # 使用 SQLAlchemy 的 insert 語句建立插入語法
-    insert_etfs_stmt = insert(etfs_table).values(**row.to_dict())
+    insert_etfs_stmt = insert(us_etfs_table).values(**row.to_dict())
 
     # 加上 on_duplicate_key_update 的邏輯：
     # 若主鍵重複（id 已存在），就更新其他欄位為新值
     update_etfs_stmt = insert_etfs_stmt.on_duplicate_key_update(
         **{
             col.name: insert_etfs_stmt.inserted[col.name]
-            for col in etfs_table.columns
+            for col in us_etfs_table.columns
             if col.name not in ("id")
         }
     )
@@ -126,11 +91,11 @@ for _, row in df_etfs.iterrows():
 # 批次寫入中大量資料
 records_etf_daily = df_etf_daily_price.to_dict(orient="records")
 
-insert_etf_daily_stmt = insert(etf_daily_price_table)
+insert_etf_daily_stmt = insert(us_etf_daily_price_table)
 update_etf_daily_stmt = insert_etf_daily_stmt.on_duplicate_key_update(
     {
         col.name: insert_etf_daily_stmt.inserted[col.name]
-        for col in etf_daily_price_table.columns
+        for col in us_etf_daily_price_table.columns
         if col.name not in ("etf_id", "date")
     }
 )
